@@ -1,5 +1,10 @@
 const CACHE = 'serials-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/icon.svg'];
+const ASSETS = [
+  '/serials-wheel/',
+  '/serials-wheel/index.html',
+  '/serials-wheel/manifest.json',
+  '/serials-wheel/icon.svg'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
