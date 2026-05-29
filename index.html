@@ -522,7 +522,7 @@ function spin() {
 
 // SERVICE WORKER
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('/serials-wheel/sw.js').catch(()=>{});
 }
 
 updateNameBadges(); renderLists(); drawWheel(0);
