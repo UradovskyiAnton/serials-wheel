@@ -2,14 +2,15 @@
   "name": "Що дивимось?",
   "short_name": "Серіали",
   "description": "Колесо для вибору серіалу",
-  "start_url": "/",
+  "start_url": "/serials-wheel/",
+  "scope": "/serials-wheel/",
   "display": "standalone",
   "background_color": "#0f0e0c",
   "theme_color": "#0f0e0c",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "/serials-wheel/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
