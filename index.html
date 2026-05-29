@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Серіали"/>
+<meta name="theme-color" content="#0f0e0c"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon.svg"/>
+<title>🎬 Що дивимось?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0f0e0c;
+  --surface: #1a1917;
+  --surface2: #242220;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0ede8;
+  --muted: #7a776f;
+  --accent: #e8c97a;
+  --p1: #b8d4e8;
+  --p2: #e8b4c8;
+  --radius: 14px;
+  --font-head: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bot: env(safe-area-inset-bottom);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  min-height:100dvh;
+  padding: calc(var(--safe-top) + 1rem) 1rem calc(var(--safe-bot) + 5rem);
+  overscroll-behavior:none;
+}
+h1,h2,h3{font-family:var(--font-head)}
+
+.wrap{max-width:560px;margin:0 auto}
+
+/* HEADER */
+.site-header{text-align:center;margin-bottom:2rem}
+.site-header h1{font-size:28px;font-weight:500;letter-spacing:-0.02em}
+.names-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.name-badge{font-size:13px;padding:4px 14px;border-radius:999px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.name-badge.p1{background:rgba(184,212,232,0.15);color:var(--p1);border:1px solid rgba(184,212,232,0.25)}
+.name-badge.p2{background:rgba(232,180,200,0.15);color:var(--p2);border:1px solid rgba(232,180,200,0.25)}
+.name-badge:hover{opacity:.7}
+.hearts{color:var(--accent);font-size:13px}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border2);
+  display:flex;
+  padding-bottom:var(--safe-bot);
+  z-index:90;
+}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 8px;cursor:pointer;color:var(--muted);font-size:10px;gap:3px;transition:color .15s}
+.nav-item.active{color:var(--accent)}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* WHEEL */
+.wheel-section{display:flex;flex-direction:column;align-items:center;gap:1.25rem;margin-bottom:1.5rem}
+.wheel-wrap{position:relative;display:inline-block}
+canvas{display:block;border-radius:50%}
+.pointer{position:absolute;top:50%;right:-20px;transform:translateY(-50%);width:0;height:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:22px solid var(--accent)}
+.spin-btn{font-family:var(--font-head);font-size:17px;font-weight:500;padding:14px 52px;border-radius:999px;background:var(--accent);color:#1a1610;border:none;cursor:pointer;transition:transform .1s,opacity .15s;-webkit-tap-highlight-color:transparent}
+.spin-btn:active{transform:scale(0.96)}
+.spin-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.result-box{min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 28px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border2);text-align:center;width:100%}
+.result-name{font-family:var(--font-head);font-size:20px;font-weight:500;color:var(--text)}
+.result-sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;text-align:center}
+.stat-card .val{font-family:var(--font-head);font-size:20px;font-weight:500;color:var(--accent)}
+.stat-card .lbl{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.3}
+
+/* LISTS */
+.lists-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+@media(max-width:400px){.lists-grid{grid-template-columns:1fr}}
+.list-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem}
+.list-card-title{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.list-card-title.c1{color:var(--p1)}
+.list-card-title.c2{color:var(--p2)}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:8px}
+.search-wrap input{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;font-family:var(--font-body);-webkit-appearance:none}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-wrap input:focus{border-color:rgba(255,255,255,.3)}
+.dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;z-index:50;overflow:hidden;max-height:200px;overflow-y:auto;display:none}
+.dropdown.open{display:block}
+.dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;transition:background .1s;font-size:12px;-webkit-tap-highlight-color:transparent}
+.dropdown-item:active{background:rgba(255,255,255,.05)}
+.dropdown-item img{width:28px;height:40px;object-fit:cover;border-radius:3px;flex-shrink:0;background:var(--border)}
+.di-info{flex:1;min-width:0}
+.di-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.di-meta{font-size:10px;color:var(--muted)}
+.di-rate{font-size:11px;color:var(--accent);margin-left:auto;flex-shrink:0}
+
+/* PILLS */
+.pill-list{display:flex;flex-direction:column;gap:4px}
+.pill{display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:8px;font-size:11.5px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--text)}
+.pill img{width:18px;height:26px;object-fit:cover;border-radius:2px;flex-shrink:0}
+.pill-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill-rate{font-size:10px;color:var(--accent);flex-shrink:0}
+.pill-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px;line-height:1;display:flex;align-items:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.pill-btn:active{color:var(--text)}
+.pill-btn.watch{color:rgba(100,200,130,.6)}
+.pill-btn.watch:active{color:rgba(100,200,130,1)}
+.note-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:2px;-webkit-tap-highlight-color:transparent}
+.empty{font-size:12px;color:var(--muted);padding:2px 0}
+
+/* WATCHED */
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem;margin-bottom:1rem}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-header h3{font-size:13px;font-weight:500;color:var(--muted)}
+.watched-list{display:flex;flex-direction:column;gap:6px}
+.watched-item{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--border);font-size:12px}
+.watched-item img{width:20px;height:28px;object-fit:cover;border-radius:2px;flex-shrink:0}
+.wi-name{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi-who{font-size:10px;padding:2px 7px;border-radius:999px;flex-shrink:0}
+.wi-who.c1{background:rgba(184,212,232,.12);color:var(--p1)}
+.wi-who.c2{background:rgba(232,180,200,.12);color:var(--p2)}
+.wi-rating{display:flex;gap:1px}
+.star-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:0;line-height:1;opacity:.3;transition:opacity .1s;-webkit-tap-highlight-color:transparent}
+.star-btn.active{opacity:1}
+.wi-date{font-size:10px;color:var(--muted);flex-shrink:0}
+.wi-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px;-webkit-tap-highlight-color:transparent}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px 20px 16px 16px;padding:1.5rem;width:100%;max-width:420px}
+.modal h3{font-family:var(--font-head);font-size:18px;margin-bottom:1rem;color:var(--text)}
+.modal input,.modal textarea{width:100%;font-size:14px;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);outline:none;font-family:var(--font-body);margin-bottom:10px;-webkit-appearance:none}
+.modal textarea{resize:none;height:80px}
+.modal input:focus,.modal textarea:focus{border-color:rgba(255,255,255,.3)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.modal-btns button{padding:10px 20px;border-radius:10px;font-size:14px;cursor:pointer;font-family:var(--font-body);-webkit-tap-highlight-color:transparent}
+.btn-cancel{background:none;border:1px solid var(--border2);color:var(--muted)}
+.btn-save{background:var(--accent);border:none;color:#1a1610;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site-header">
+    <h1>🎬 Що дивимось?</h1>
+    <div class="names-row">
+      <span class="name-badge p1" id="name1badge" onclick="openNameModal(1)"></span>
+      <span class="hearts">♥</span>
+      <span class="name-badge p2" id="name2badge" onclick="openNameModal(2)"></span>
+    </div>
+  </header>
+
+  <!-- WHEEL -->
+  <div id="tab-wheel">
+    <div class="wheel-section">
+      <div class="wheel-wrap">
+        <canvas id="wheel" width="290" height="290"></canvas>
+        <div class="pointer"></div>
+      </div>
+      <button class="spin-btn" id="spinBtn" onclick="spin()">Крутити!</button>
+      <div class="result-box">
+        <div class="result-name" id="resultName">Додайте серіали у списки</div>
+        <div class="result-sub" id="resultSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTS -->
+  <div id="tab-lists" style="display:none">
+    <div class="lists-grid">
+      <div class="list-card">
+        <div class="list-card-title c1" id="title1"></div>
+        <div class="search-wrap">
+          <input id="inp1" placeholder="Пошук серіалу..." oninput="onSearch(1)" autocomplete="off"/>
+          <div class="dropdown" id="dd1"></div>
+        </div>
+        <div class="pill-list" id="list1"></div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-title c2" id="title2"></div>
+        <div class="search-wrap">
+          <input id="inp2" placeholder="Пошук серіалу..." oninput="onSearch(2)" autocomplete="off"/>
+          <div class="dropdown" id="dd2"></div>
+        </div>
+        <div class="pill-list" id="list2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATCHED -->
+  <div id="tab-watched" style="display:none">
+    <div class="section-card">
+      <div class="section-header">
+        <h3>Вже переглянуто ✓</h3>
+        <span style="font-size:11px;color:var(--muted)" id="watchedCount"></span>
+      </div>
+      <div class="watched-list" id="watchedList"></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div id="tab-stats" style="display:none">
+    <div class="stats-row">
+      <div class="stat-card"><div class="val" id="st-total">0</div><div class="lbl">У списках</div></div>
+      <div class="stat-card"><div class="val" id="st-watched">0</div><div class="lbl">Переглянуто</div></div>
+      <div class="stat-card"><div class="val" id="st-spins">0</div><div class="lbl">Кручень</div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="val" id="st-n1wins" style="color:var(--p1)">0</div><div class="lbl" id="st-n1lbl"></div></div>
+      <div class="stat-card"><div class="val" id="st-n2wins" style="color:var(--p2)">0</div><div class="lbl" id="st-n2lbl"></div></div>
+      <div class="stat-card"><div class="val" id="st-avgrate" style="color:var(--accent)">—</div><div class="lbl">Сер. оцінка</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-header"><h3>Топ переглянутих ⭐</h3></div>
+      <div class="watched-list" id="topList"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="switchTab('wheel')" id="nav-wheel">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="12"/><line x1="12" y1="12" x2="18.5" y2="18.5"/></svg>
+    Колесо
+  </div>
+  <div class="nav-item" onclick="switchTab('lists')" id="nav-lists">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
+    Списки
+  </div>
+  <div class="nav-item" onclick="switchTab('watched')" id="nav-watched">
+    <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    Переглянуто
+  </div>
+  <div class="nav-item" onclick="switchTab('stats')" id="nav-stats">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Статистика
+  </div>
+</nav>
+
+<!-- NAME MODAL -->
+<div class="modal-overlay" id="nameModal">
+  <div class="modal">
+    <h3>Змінити ім'я</h3>
+    <input id="nameInput" placeholder="Ваше ім'я" maxlength="20"/>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('nameModal')">Скасувати</button>
+      <button class="btn-save" onclick="saveName()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal">
+    <h3>Нотатка</h3>
+    <textarea id="noteInput" placeholder="Наприклад: з 3 сезону краще..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('noteModal')">Скасувати</button>
+      <button class="btn-save" onclick="saveNote()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TMDB_KEY = 'YOUR_TMDB_API_KEY';
+const TMDB_IMG = 'https://image.tmdb.org/t/p/w92';
+
+let state = {
+  names: ['Я', 'Кохана'],
+  shows: { 1: [], 2: [] },
+  watched: [],
+  spins: 0,
+  wins: { 1: 0, 2: 0 },
+};
+
+function load() {
+  try { const s = localStorage.getItem('ws'); if (s) state = {...state,...JSON.parse(s)}; } catch(e) {}
+}
+function save() {
+  try { localStorage.setItem('ws', JSON.stringify(state)); } catch(e) {}
+}
+load();
+
+function switchTab(name) {
+  ['wheel','lists','watched','stats'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name?'':'none';
+    document.getElementById('nav-'+t).classList.toggle('active', t===name);
+  });
+  if (name==='watched') renderWatched();
+  if (name==='stats') renderStats();
+  if (name==='wheel') drawWheel(currentAngle);
+}
+
+let editingName = 1;
+function updateNameBadges() {
+  document.getElementById('name1badge').textContent = state.names[0];
+  document.getElementById('name2badge').textContent = state.names[1];
+  document.getElementById('title1').textContent = state.names[0];
+  document.getElementById('title2').textContent = state.names[1];
+}
+function openNameModal(who) {
+  editingName = who;
+  document.getElementById('nameInput').value = state.names[who-1];
+  document.getElementById('nameModal').classList.add('open');
+}
+function saveName() {
+  const v = document.getElementById('nameInput').value.trim();
+  if (v) state.names[editingName-1] = v;
+  save(); updateNameBadges(); renderLists();
+  closeModal('nameModal');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+let noteCtx = null;
+function openNoteModal(who, idx) {
+  noteCtx = {who, idx};
+  document.getElementById('noteInput').value = state.shows[who][idx].note || '';
+  document.getElementById('noteModal').classList.add('open');
+}
+function saveNote() {
+  if (noteCtx) { state.shows[noteCtx.who][noteCtx.idx].note = document.getElementById('noteInput').value.trim(); save(); renderLists(); }
+  closeModal('noteModal');
+}
+
+let searchTimer = null;
+function onSearch(who) {
+  clearTimeout(searchTimer);
+  const q = document.getElementById('inp'+who).value.trim();
+  if (!q) { closeDD(who); return; }
+  searchTimer = setTimeout(() => fetchShows(q, who), 400);
+}
+async function fetchShows(q, who) {
+  if (TMDB_KEY === 'YOUR_TMDB_API_KEY') { showManualAdd(q, who); return; }
+  try {
+    const r = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=uk-UA`);
+    const d = await r.json();
+    showDD(d.results?.slice(0,6)||[], who);
+  } catch(e) { showManualAdd(q, who); }
+}
+function showManualAdd(q, who) {
+  const dd = document.getElementById('dd'+who);
+  const safe = q.replace(/'/g,"\\'");
+  dd.innerHTML = `<div class="dropdown-item" onclick="addShow(${who},{name:'${safe}',poster:null,rating:null,year:null})">
+    <div style="width:28px;height:40px;border-radius:3px;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">+</div>
+    <div class="di-info"><div class="di-name">Додати «${q}»</div><div class="di-meta">вручну</div></div></div>`;
+  dd.classList.add('open');
+}
+function showDD(results, who) {
+  const dd = document.getElementById('dd'+who);
+  if (!results.length) { closeDD(who); return; }
+  dd.innerHTML = results.map(r => {
+    const poster = r.poster_path ? `${TMDB_IMG}${r.poster_path}` : null;
+    const year = r.first_air_date ? r.first_air_date.slice(0,4) : '';
+    const rate = r.vote_average ? r.vote_average.toFixed(1) : '';
+    const obj = JSON.stringify({name:r.name,poster,rating:rate,year}).replace(/"/g,'&quot;');
+    return `<div class="dropdown-item" onclick="addShow(${who},${obj})">
+      ${poster?`<img src="${poster}" alt="">` : `<div style="width:28px;height:40px;border-radius:3px;background:var(--border2);flex-shrink:0"></div>`}
+      <div class="di-info"><div class="di-name">${r.name}</div><div class="di-meta">${year}</div></div>
+      ${rate?`<div class="di-rate">★ ${rate}</div>`:''}
+    </div>`;
+  }).join('');
+  dd.classList.add('open');
+}
+function closeDD(who) { document.getElementById('dd'+who).classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) { closeDD(1); closeDD(2); } });
+
+function addShow(who, data) {
+  if (!data?.name) return;
+  const already = [...state.shows[1],...state.shows[2]].some(s=>s.name===data.name);
+  if (already) { closeDD(who); return; }
+  state.shows[who].push({name:data.name,poster:data.poster||null,rating:data.rating||null,year:data.year||null,note:'',who});
+  document.getElementById('inp'+who).value = '';
+  closeDD(who); save(); renderLists(); drawWheel(currentAngle);
+}
+function removeShow(who, idx) { state.shows[who].splice(idx,1); save(); renderLists(); drawWheel(currentAngle); }
+function markWatched(who, idx) {
+  const show = state.shows[who][idx];
+  state.watched.push({...show, date: new Date().toLocaleDateString('uk-UA'), ratingUser:0});
+  state.shows[who].splice(idx,1);
+  save(); renderLists(); drawWheel(currentAngle);
+}
+
+function renderLists() {
+  updateNameBadges();
+  [1,2].forEach(who => {
+    const el = document.getElementById('list'+who);
+    const arr = state.shows[who];
+    if (!arr.length) { el.innerHTML='<span class="empty">Список порожній</span>'; return; }
+    el.innerHTML = arr.map((s,i)=>`
+      <div class="pill">
+        ${s.poster?`<img src="${s.poster}" alt="">`:''}
+        <span class="pill-name">${s.name}</span>
+        ${s.rating?`<span class="pill-rate">★${s.rating}</span>`:''}
+        <button class="note-btn" onclick="openNoteModal(${who},${i})" title="${s.note||'Нотатка'}">📝</button>
+        <button class="pill-btn watch" onclick="markWatched(${who},${i})">✓</button>
+        <button class="pill-btn" onclick="removeShow(${who},${i})">×</button>
+      </div>`).join('');
+  });
+}
+
+function renderWatched() {
+  const el = document.getElementById('watchedList');
+  const arr = state.watched;
+  document.getElementById('watchedCount').textContent = arr.length + ' серіалів';
+  if (!arr.length) { el.innerHTML='<span class="empty">Ще нічого не переглянуто</span>'; return; }
+  el.innerHTML = [...arr].reverse().map((s,ri)=>{
+    const i = arr.length-1-ri;
+    const whoName = s.who==1?state.names[0]:state.names[1];
+    const whoClass = s.who==1?'c1':'c2';
+    return `<div class="watched-item">
+      ${s.poster?`<img src="${s.poster}" alt="">`:''}
+      <span class="wi-name">${s.name}</span>
+      <span class="wi-who ${whoClass}">${whoName}</span>
+      <div class="wi-rating">${[1,2,3,4,5].map(n=>`<button class="star-btn${s.ratingUser>=n?' active':''}" onclick="rateWatched(${i},${n})">★</button>`).join('')}</div>
+      <span class="wi-date">${s.date}</span>
+      <button class="wi-del" onclick="delWatched(${i})">×</button>
+    </div>`;
+  }).join('');
+}
+function rateWatched(idx,r){state.watched[idx].ratingUser=r;save();renderWatched();}
+function delWatched(idx){state.watched.splice(idx,1);save();renderWatched();}
+
+function renderStats() {
+  document.getElementById('st-total').textContent = state.shows[1].length+state.shows[2].length;
+  document.getElementById('st-watched').textContent = state.watched.length;
+  document.getElementById('st-spins').textContent = state.spins;
+  document.getElementById('st-n1wins').textContent = state.wins[1]||0;
+  document.getElementById('st-n1lbl').textContent = 'Перемог '+state.names[0];
+  document.getElementById('st-n2wins').textContent = state.wins[2]||0;
+  document.getElementById('st-n2lbl').textContent = 'Перемог '+state.names[1];
+  const rated = state.watched.filter(w=>w.ratingUser>0);
+  const avg = rated.length?(rated.reduce((a,b)=>a+b.ratingUser,0)/rated.length).toFixed(1):'—';
+  document.getElementById('st-avgrate').textContent = avg==='—'?'—':'★'+avg;
+  const top = [...state.watched].filter(w=>w.ratingUser>0).sort((a,b)=>b.ratingUser-a.ratingUser).slice(0,5);
+  document.getElementById('topList').innerHTML = top.length?top.map(s=>`
+    <div class="watched-item">
+      ${s.poster?`<img src="${s.poster}" alt="">`:''}
+      <span class="wi-name">${s.name}</span>
+      <span style="color:var(--accent);font-size:12px">${'★'.repeat(s.ratingUser)}</span>
+    </div>`).join(''):'<span class="empty">Оцініть переглянуті серіали</span>';
+}
+
+const COLORS_W1 = '#1e2d3a', COLORS_T1 = '#b8d4e8';
+const COLORS_W2 = '#3a2535', COLORS_T2 = '#e8b4c8';
+const COLORS_ALT = [['#2d3a2a','#a8d4a0'],['#3a3020','#e8c87a'],['#2a3040','#a0b8e8']];
+let spinning=false, currentAngle=0;
+
+function allShows(){ return [...state.shows[1].map(s=>({...s,who:1})),...state.shows[2].map(s=>({...s,who:2}))]; }
+
+function drawWheel(angle) {
+  const c = document.getElementById('wheel'); if(!c) return;
+  const ctx=c.getContext('2d'), cx=145,cy=145,r=133;
+  ctx.clearRect(0,0,290,290);
+  const items=allShows();
+  if (!items.length) {
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#1a1917';ctx.fill();
+    ctx.fillStyle='#7a776f';ctx.font='13px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText('Додайте серіали',cx,cy);
+    return;
+  }
+  const slice=(Math.PI*2)/items.length;
+  items.forEach((s,i)=>{
+    const start=angle+i*slice,end=start+slice;
+    const fill=s.who===1?COLORS_W1:s.who===2?COLORS_W2:COLORS_ALT[i%3][0];
+    const textCol=s.who===1?COLORS_T1:s.who===2?COLORS_T2:COLORS_ALT[i%3][1];
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,end);ctx.closePath();
+    ctx.fillStyle=fill;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(start+slice/2);
+    ctx.textAlign='right';ctx.fillStyle=textCol;
+    const fs=items.length>10?10:items.length>6?11:12;
+    ctx.font=`500 ${fs}px DM Sans,sans-serif`;
+    ctx.fillText(s.name.length>15?s.name.slice(0,14)+'…':s.name,r-8,4);
+    ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(cx,cy,16,0,Math.PI*2);ctx.fillStyle='#0f0e0c';ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.stroke();
+}
+
+function spin() {
+  const items=allShows();
+  if (!items.length||spinning) return;
+  spinning=true;
+  document.getElementById('spinBtn').disabled=true;
+  document.getElementById('resultName').textContent='…';
+  document.getElementById('resultSub').textContent='';
+  state.spins++;
+  const slice=(Math.PI*2)/items.length;
+  const total=Math.PI*2*(6+Math.random()*4)+Math.random()*Math.PI*2;
+  const duration=3800,start=performance.now(),startAngle=currentAngle;
+  function ease(t){return 1-Math.pow(1-t,4)}
+  function frame(now){
+    const t=Math.min((now-start)/duration,1);
+    currentAngle=startAngle+total*ease(t);
+    drawWheel(currentAngle);
+    if(t<1){requestAnimationFrame(frame);return}
+    currentAngle=currentAngle%(Math.PI*2);
+    const idx=Math.floor(((Math.PI*2-currentAngle)%(Math.PI*2))/slice)%items.length;
+    const winner=items[idx];
+    document.getElementById('resultName').textContent=winner.name;
+    document.getElementById('resultSub').textContent=`зі списку ${winner.who===1?state.names[0]:state.names[1]}${winner.rating?' · ★'+winner.rating:''}`;
+    state.wins[winner.who]=(state.wins[winner.who]||0)+1;
+    save(); spinning=false; document.getElementById('spinBtn').disabled=false;
+  }
+  requestAnimationFrame(frame);
+}
+
+// SERVICE WORKER
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+updateNameBadges(); renderLists(); drawWheel(0);
+</script>
+</body>
+</html>
