@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#3d1f3a"/>
+      <stop offset="100%" stop-color="#1e1020"/>
+    </radialGradient>
+    <radialGradient id="screenGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f4a7c0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#f4a7c0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="filmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f9c0d4"/>
+      <stop offset="100%" stop-color="#e8809f"/>
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffb3cc"/>
+      <stop offset="100%" stop-color="#e8809f"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Rounded rect background -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+
+  <!-- Soft glow center -->
+  <ellipse cx="256" cy="240" rx="200" ry="180" fill="url(#screenGlow)"/>
+
+  <!-- Stars scattered -->
+  <!-- Star top-left -->
+  <g transform="translate(88, 90)" filter="url(#glow)">
+    <polygon points="0,-14 3.5,-5 13,-5 5.5,1 8.5,11 0,5 -8.5,11 -5.5,1 -13,-5 -3.5,-5" fill="#ffd6e8" opacity="0.9"/>
+  </g>
+  <!-- Star top-right -->
+  <g transform="translate(424, 110)" filter="url(#glow)">
+    <polygon points="0,-10 2.5,-3.5 9,-3.5 4,1 6,8 0,4 -6,8 -4,1 -9,-3.5 -2.5,-3.5" fill="#ffb3cc" opacity="0.85"/>
+  </g>
+  <!-- Star right -->
+  <g transform="translate(440, 280)" filter="url(#glow)">
+    <polygon points="0,-8 2,-2.5 7.5,-2.5 3,1 5,6.5 0,3 -5,6.5 -3,1 -7.5,-2.5 -2,-2.5" fill="#ffd6e8" opacity="0.7"/>
+  </g>
+  <!-- Star bottom-left small -->
+  <g transform="translate(72, 360)">
+    <polygon points="0,-6 1.5,-2 5.5,-2 2.5,0.5 3.5,5 0,2.5 -3.5,5 -2.5,0.5 -5.5,-2 -1.5,-2" fill="#f4a7c0" opacity="0.6"/>
+  </g>
+  <!-- Star top-center small -->
+  <g transform="translate(310, 68)">
+    <polygon points="0,-7 1.8,-2.5 6.5,-2.5 2.8,0.5 4,5.5 0,3 -4,5.5 -2.8,0.5 -6.5,-2.5 -1.8,-2.5" fill="#ffcce0" opacity="0.75"/>
+  </g>
+
+  <!-- Film clapper board body -->
+  <rect x="148" y="190" width="216" height="170" rx="18" fill="url(#filmGrad)" opacity="0.15"/>
+  <rect x="148" y="190" width="216" height="170" rx="18" fill="none" stroke="url(#filmGrad)" stroke-width="3" opacity="0.6"/>
+
+  <!-- Clapper top bar -->
+  <rect x="148" y="162" width="216" height="44" rx="12" fill="url(#filmGrad)" opacity="0.9"/>
+
+  <!-- Clapper stripes on top bar -->
+  <clipPath id="clipBar">
+    <rect x="148" y="162" width="216" height="44" rx="12"/>
+  </clipPath>
+  <g clip-path="url(#clipBar)" opacity="0.5">
+    <rect x="168" y="155" width="22" height="56" fill="#2a1020" transform="rotate(-15 179 183)"/>
+    <rect x="210" y="155" width="22" height="56" fill="#2a1020" transform="rotate(-15 221 183)"/>
+    <rect x="252" y="155" width="22" height="56" fill="#2a1020" transform="rotate(-15 263 183)"/>
+    <rect x="294" y="155" width="22" height="56" fill="#2a1020" transform="rotate(-15 305 183)"/>
+    <rect x="336" y="155" width="22" height="56" fill="#2a1020" transform="rotate(-15 347 183)"/>
+  </g>
+
+  <!-- Film holes on sides -->
+  <g fill="#3d1f3a" opacity="0.7">
+    <rect x="158" y="210" width="14" height="22" rx="4"/>
+    <rect x="158" y="248" width="14" height="22" rx="4"/>
+    <rect x="158" y="286" width="14" height="22" rx="4"/>
+    <rect x="340" y="210" width="14" height="22" rx="4"/>
+    <rect x="340" y="248" width="14" height="22" rx="4"/>
+    <rect x="340" y="286" width="14" height="22" rx="4"/>
+  </g>
+
+  <!-- Big heart in center of film -->
+  <g transform="translate(256, 275)" filter="url(#softGlow)">
+    <path d="M0,14 C0,14 -38,-10 -38,-30 C-38,-50 -18,-58 0,-42 C18,-58 38,-50 38,-30 C38,-10 0,14 0,14 Z" fill="url(#heartGrad)"/>
+  </g>
+
+  <!-- Sparkle dots around heart -->
+  <circle cx="194" cy="248" r="4" fill="#ffd6e8" opacity="0.8"/>
+  <circle cx="318" cy="248" r="4" fill="#ffd6e8" opacity="0.8"/>
+  <circle cx="208" cy="310" r="3" fill="#ffb3cc" opacity="0.6"/>
+  <circle cx="304" cy="310" r="3" fill="#ffb3cc" opacity="0.6"/>
+
+  <!-- Bottom dots decoration -->
+  <circle cx="200" cy="400" r="5" fill="#f4a7c0" opacity="0.4"/>
+  <circle cx="256" cy="412" r="7" fill="#f4a7c0" opacity="0.5"/>
+  <circle cx="312" cy="400" r="5" fill="#f4a7c0" opacity="0.4"/>
+
+  <!-- Tiny star bottom right -->
+  <g transform="translate(390, 400)" filter="url(#glow)">
+    <polygon points="0,-12 3,-4 11,-4 4.5,1 7,9 0,4.5 -7,9 -4.5,1 -11,-4 -3,-4" fill="#ffd6e8" opacity="0.85"/>
+  </g>
+</svg>
